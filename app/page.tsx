@@ -69,7 +69,7 @@ export default function Home() {
     x: rowIdx % 2 === 0 ? ["0%", "-50%"] : ["-50%", "0%"],
     transition: {
       repeat: Infinity,
-      ease: "linear",
+      ease: "linear" as const,
       duration: 20 + rowIdx * 6, // qatorda ozgina farq bilan (1-qator tezroq)
     },
   });
