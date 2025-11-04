@@ -19,12 +19,14 @@ export default function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode
+
+
+  
 }>) {
   return (
     <html lang="uz">
       <body className={`font-sans antialiased ${inter.className}`}>
         {children}
-
       </body>
     </html>
   )
