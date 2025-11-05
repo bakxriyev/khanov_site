@@ -47,7 +47,7 @@ const benefits = [
 ]
 
 const clientLogos = [
-  { icon: "/1.jpg", label: "Kompaniya 1" },
+  { icon: "/public/1.jpg", label: "Kompaniya 1" },
   { icon: "/2.jpg", label: "Kompaniya 2" },
   { icon: "/3.jpg", label: "Kompaniya 3" },
   { icon: "/4.jpg", label: "Kompaniya 4" },
