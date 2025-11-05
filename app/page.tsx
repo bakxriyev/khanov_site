@@ -204,7 +204,7 @@ export default function Home() {
       transition: {
         repeat: Number.POSITIVE_INFINITY,
         duration: 20,
-        ease: "linear",
+        ease: "linear" as const,
       },
     }),
   }
