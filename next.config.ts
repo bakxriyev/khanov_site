@@ -1,8 +1,11 @@
-import type { NextConfig } from "next";
+import type { NextConfig } from "next"
 
 const nextConfig: NextConfig = {
-  allowedDevOrigins: ["http://localhost:3000"],
-  /* config options here */
-};
+  output: "standalone", // agar serverda PM2 yoki Nginx bilan ishlatayotgan bo‘lsangiz
+  reactStrictMode: true,
+  images: {
+    unoptimized: true, // <img> ishlatganingiz uchun Next image optimizatsiyasi kerak emas
+  },
+}
 
-export default nextConfig;
+export default nextConfig
