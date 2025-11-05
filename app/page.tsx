@@ -183,17 +183,18 @@ export default function Home() {
     },
   }
 
-  const generateLogoRows = () => {
-    const rows = []
-    for (let i = 0; i < 4; i++) {
-      const shuffled = shuffleArray(clientLogos)
-      rows.push({
-        logos: [...shuffled, ...shuffled],
-        direction: i % 2 === 0 ? 1 : -1, // 0 va 2 o'ngga, 1 va 3 chapga
-      })
-    }
-    return rows
+ const generateLogoRows = () => {
+  const rows: { logos: any[]; direction: number }[] = []
+  for (let i = 0; i < 4; i++) {
+    const shuffled = shuffleArray(clientLogos)
+    rows.push({
+      logos: [...shuffled, ...shuffled],
+      direction: i % 2 === 0 ? 1 : -1,
+    })
   }
+  return rows
+}
+
 
   const logoRows = generateLogoRows()
 
