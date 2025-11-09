@@ -480,11 +480,11 @@ export default function Home() {
 
     <VideoCarousel
       videos={[
-        "/video1.mp4",
-        "/video2.mp4",
-        "/video3.mp4",
-        "/video5.mp4",
-        "/video4.mp4",
+        "/video1.MP4",
+        "/video2.MP4",
+        "/video3.MP4",
+        "/video5.MP4",
+        "/video4.MP4",
       ]}
     />
   </div>
