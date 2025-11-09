@@ -296,7 +296,7 @@ export default function Home() {
           <div className="flex flex-col -mt-5 md:flex-row items-center justify-center gap-8 md:gap-12 w-full max-w-5xl">
             <div className="flex flex-col items-center gap-4 flex-shrink-0 w-full md:w-auto">
               <img
-                src="/photo.jpg"
+                src="/khanov.png"
                 alt="CRM Dashboard"
                 className="w-full max-w-xs sm:max-w-sm md:max-w-md -mb-12 rounded-2xl transform -skew-y-3 hover:skew-y-0 transition-transform duration-300 "
               />
@@ -565,7 +565,7 @@ export default function Home() {
                 <div className="absolute -inset-1 bg-gradient-to-r  rounded-3xl blur opacity-75 group-hover:opacity-100 transition duration-500 animate-pulse"></div>
                 <div className="relative">
                   <img
-                    src="/photo.jpg"
+                    src="/khanov.png"
                     alt="Bekzod Khanov"
                     className="w-36 h-56 sm:w-64 sm:h-64 md:w-72 md:h-72  object-cover transform group-hover:scale-105 transition-all duration-500  "
                   />
