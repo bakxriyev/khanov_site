@@ -3,6 +3,8 @@
 import { useState, useEffect } from "react"
 import { motion } from "framer-motion"
 import { ArrowLeft } from "lucide-react"
+import CountdownTimer from "@/components/timer"
+import VideoCarousel from "@/components/videoCarusel"
 
 const solutions = [
   {
@@ -181,17 +183,17 @@ export default function Home() {
     },
   }
 
- const generateLogoRows = () => {
-  const rows: { logos: any[]; direction: number }[] = []
-  for (let i = 0; i < 4; i++) {
-    const shuffled = shuffleArray(clientLogos)
-    rows.push({
-      logos: [...shuffled, ...shuffled],
-      direction: i % 2 === 0 ? 1 : -1,
-    })
+  const generateLogoRows = () => {
+    const rows: { logos: any[]; direction: number }[] = []
+    for (let i = 0; i < 4; i++) {
+      const shuffled = shuffleArray(clientLogos)
+      rows.push({
+        logos: [...shuffled, ...shuffled],
+        direction: i % 2 === 0 ? 1 : -1,
+      })
+    }
+    return rows
   }
-  return rows
-}
 
 
   const logoRows = generateLogoRows()
@@ -201,7 +203,7 @@ export default function Home() {
       x: direction === 1 ? [-0, -1152] : [-1152, -0],
       transition: {
         repeat: Number.POSITIVE_INFINITY,
-        duration: 20,
+        duration: 50,
         ease: "linear" as const,
       },
     }),
@@ -272,7 +274,7 @@ export default function Home() {
 
             {/* Taglar qatori */}
             <div className="flex flex-wrap justify-center items-center gap-3 -mt-5 sm:gap-4 md:gap-5 w-full max-w-[900px] mx-auto p-2 sm:p-3">
-              {["🔗 CRM + IP Telefoniya + AI", "📦 MoySklad + CRM", "🎯 Target + CRM"].map((text, i) => (
+              {["🔗 CRM + IP Telefoniya ", "📦 MoySklad + CRM", "🎯 Target + CRM", "🤖 AI"].map((text, i) => (
                 <div
                   key={i}
                   className="flex items-center justify-center rounded-xl 
@@ -318,15 +320,19 @@ export default function Home() {
 
           {/* Aksiya bloki */}
           <div className="flex flex-col gap-3 md:gap-4 text-center w-full max-w-lg px-4 md:px-0">
-            <div className="bg-gradient-to-r from-gray-900 to-gray-700 rounded-2xl p-4 md:p-6 lg:p-8 text-white shadow-lg">
+            <div className="bg-gradient-to-r from-gray-900 to-gray-700 rounded-2xl p-4 md:p-6 lg:p-8 text-white shadow-lg relative overflow-hidden">
               <p className="text-base text-center uppercase text-white sm:text-lg md:text-xl font-bold">
-                🎁 25-noyabrgacha 1+1 aksiyasi davom etadi.
+                🎁 25-noyabrgacha 1+1 imkoniyati davom etadi.
               </p>
               <p className="text-xs sm:text-sm text-blue-100 mt-3 md:mt-4">
                 Ariza qoldiring — bepul konsultatsiya qilamiz va eng mos yechimni tanlab beramiz.
               </p>
+
+              {/* 🔹 COUNTDOWN TIMER */}
+              <CountdownTimer targetDate="2025-11-25T00:00:00" />
             </div>
           </div>
+
         </div>
       </section>
 
@@ -433,42 +439,62 @@ export default function Home() {
       </section>
 
       {/* Cases Section - Logo Carousel */}
-      <section className="bg-gradient-to-b from-gray-800 to-gray-700 py-12 md:py-20 px-4 md:px-6 lg:px-8 overflow-hidden">
-        <div className="max-w-7xl mx-auto">
-          <h2 className="text-3xl sm:text-4xl md:text-5xl font-black text-white mb-8 md:mb-12 text-center">
-            🎯 Case va mijoz fikrlari
-          </h2>
+   <section className="bg-gradient-to-b from-gray-800 to-gray-700 py-12 md:py-20 px-4 md:px-6 lg:px-8 overflow-hidden">
+  <div className="max-w-7xl mx-auto">
+    <h2 className="text-3xl sm:text-4xl md:text-5xl font-black text-white mb-8 md:mb-12 text-center">
+      🎯 Case va mijoz fikrlari
+    </h2>
 
-          <div className="space-y-4 md:space-y-6">
-            {logoRows.map((row, rowIdx) => (
-              <div key={rowIdx} className="overflow-hidden">
-                <motion.div
-                  className="flex gap-4 md:gap-6"
-                  animate="animate"
-                  custom={row.direction}
-                  variants={scrollVariants}
-                >
-                  {row.logos.map((item, idx) => (
-                    <div
-                      key={idx}
-                      className="flex items-center justify-center p-4 md:p-6 rounded-xl h-20 md:h-28 w-20 md:w-28 flex-shrink-0"
-                      style={{
-                        background: "linear-gradient(135deg, rgba(59, 130, 246, 0.2) 0%, rgba(99, 102, 241, 0.2) 100%)",
-                      }}
-                    >
-                      <img
-                        src={item.icon || "/placeholder.svg"}
-                        alt={item.label}
-                        className="h-16 md:h-24 w-16 md:w-24 object-contain"
-                      />
-                    </div>
-                  ))}
-                </motion.div>
+    {/* 🔹 Logolar harakatlanadigan qism */}
+    <div className="space-y-4 md:space-y-6 mb-12">
+      {logoRows.map((row, rowIdx) => (
+        <div key={rowIdx} className="overflow-hidden">
+          <motion.div
+            className="flex gap-4 md:gap-6"
+            animate="animate"
+            custom={row.direction}
+            variants={scrollVariants}
+          >
+            {row.logos.map((item, idx) => (
+              <div
+                key={idx}
+                className="flex items-center justify-center p-4 md:p-6 rounded-xl h-20 md:h-28 w-20 md:w-28 flex-shrink-0"
+                style={{
+                  background:
+                    "linear-gradient(135deg, rgba(59,130,246,0.2) 0%, rgba(99,102,241,0.2) 100%)",
+                }}
+              >
+                <img
+                  src={item.icon || "/placeholder.svg"}
+                  alt={item.label}
+                  className="h-16 md:h-24 w-16 md:w-24 object-contain"
+                />
               </div>
             ))}
-          </div>
+          </motion.div>
         </div>
-      </section>
+      ))}
+    </div>
+
+    {/* 🔹 Videolar */}
+    <h3 className="text-2xl md:text-3xl font-bold text-white mb-6 text-center">
+      🎬 Mijozlar natijalari (Video)
+    </h3>
+
+    <VideoCarousel
+      videos={[
+        "/video1.mp4",
+        "/video2.mp4",
+        "/video3.mp4",
+        "/video4.mp4",
+      ]}
+    />
+  </div>
+</section>
+
+
+
+
 
       {/* CRM Form Modal */}
       {showCRMForm && (
@@ -511,7 +537,7 @@ export default function Home() {
       <section className="bg-gradient-to-r from-gray-900 via-gray-700 to-gray-800 py-12 md:py-20 px-4 md:px-6 lg:px-8 text-white">
         <div className="max-w-4xl mx-auto text-center">
           <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-black mb-4 md:mb-6 leading-tight">
-            🎁 20-noyabrgaqadar — 1+1 xizmatimizni harid qiling va Sotuvga sezilarli darajada ta'sir o'tqizing
+            🎁 25-noyabrga qadar — 1+1 xizmatimizni harid qiling va Sotuvga sezilarli darajada ta'sir o'tkazing
           </h2>
           <p className="text-base sm:text-lg md:text-xl text-white/90 mb-8 md:mb-12 leading-relaxed">
             Ariza qoldiring, biz sizning biznesingiz uchun eng mos avtomatlashtirish yechimini va byudjet hisobini
@@ -606,6 +632,35 @@ export default function Home() {
                   ))}
                 </div>
               </div>
+              <div className="flex flex-col gap-3 md:gap-4 text-center w-full max-w-lg px-4 md:px-0">
+            <div className="bg-gradient-to-r from-gray-900 to-gray-700 rounded-2xl p-4 md:p-6 lg:p-8 text-white shadow-lg relative overflow-hidden">
+              <p className="text-base text-center uppercase text-white sm:text-lg md:text-xl font-bold">
+                🎁 25-noyabrgacha 1+1 imkoniyati davom etadi.
+              </p>
+              <p className="text-xs sm:text-sm text-blue-100 mt-3 md:mt-4">
+                Ariza qoldiring — bepul konsultatsiya qilamiz va eng mos yechimni tanlab beramiz.
+              </p>
+
+              {/* 🔹 COUNTDOWN TIMER */}
+              <CountdownTimer targetDate="2025-11-25T00:00:00" />
+            </div>
+          </div>
+          <button
+                onClick={() => setShowCRMForm(true)}
+                className="bg-gradient-to-br from-blue-600 to-blue-500 hover:from-blue-700 hover:to-blue-600 
+                  text-white font-bold py-4 px-18 rounded-xl transition-all duration-300 transform hover:-translate-y-2 
+                  hover:shadow-2xl active:translate-y-0 text-lg uppercase shadow-xl relative"
+                style={{
+                  boxShadow: "0 10px 30px rgba(37, 99, 235, 0.4), 0 4px 12px rgba(37, 99, 235, 0.3)",
+                }}
+              >
+                <span className="relative z-10">
+                  Ariza qoldiring
+                  <ArrowLeft className="inline-block ml-2 mb-1" size={20} />
+                </span>
+                <div className="absolute inset-0 rounded-xl bg-gradient-to-br from-blue-700 to-blue-600 -z-10 translate-y-2 blur-sm opacity-75"></div>
+              </button>
+
             </div>
           </div>
         </div>
@@ -615,7 +670,7 @@ export default function Home() {
       <footer className="bg-gradient-to-b from-gray-900 to-black text-white py-8 md:py-12 px-4 md:px-6 lg:px-8">
         <div className="max-w-7xl mx-auto">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8 mb-6 md:mb-8">
-          
+
             <div className="flex justify-center gap-6 md:gap-8">
               <a
                 href="https://t.me/khanov_business"

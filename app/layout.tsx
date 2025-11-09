@@ -10,9 +10,9 @@ const inter = Inter({ subsets: ["latin"] })
 const poppins = Poppins({ subsets: ["latin"], weight: ["400", "600", "700", "800"] })
 
 export const metadata: Metadata = {
-  title: "v0 App",
-  description: "Created with v0",
-  generator: "v0.app",
+  title: "Khanov Bekzod - ITZONE UZ",
+  description: "Created by ITZONE UZ",
+  generator: "ITZONE UZ",
 }
 
 export default function RootLayout({
