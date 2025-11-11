@@ -1,10 +1,14 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import type React from "react"
+
+import { useState } from "react"
 import { motion } from "framer-motion"
 import { ArrowLeft } from "lucide-react"
 import CountdownTimer from "@/components/timer"
 import VideoCarousel from "@/components/videoCarusel"
+import Image from "next/image"
+
 
 const solutions = [
   {
@@ -106,6 +110,21 @@ const clientLogos = [
   { icon: "/56.JPG", label: "Kompaniya 19" },
 ]
 
+const uzbekistanRegions = [
+  "Tashkent",
+  "Tashkent shahar",
+  "Andijon",
+  "Buxoro",
+  "Farg'ona",
+  "Jizzax",
+  "Xorazm",
+  "Namangan",
+  "Navoi",
+  "Samarqand",
+  "Sirdaryo",
+  "Surkhandaryo",
+]
+
 const bgImages = [
   { src: "./amo.png", top: "10%", left: "5%" },
   { src: "./crm.png", top: "15%", right: "15%" },
@@ -125,52 +144,15 @@ const shuffleArray = (array) => {
 
 export default function Home() {
   const [showCRMForm, setShowCRMForm] = useState(false)
-  const [formSubmitted, setFormSubmitted] = useState(false)
+  const [loading, setLoading] = useState(false)
+  const [successMessage, setSuccessMessage] = useState("");
 
-  // iframe ichidagi forma submit hodisasini kuzatish
-  useEffect(() => {
-    if (showCRMForm) {
-      const handleMessage = (event) => {
-        // amoCRM dan kelgan xabarlarni tinglash
-        if (event.data) {
-          const data = typeof event.data === "string" ? event.data : JSON.stringify(event.data)
-
-          // Forma yuborilganini aniqlash
-          if (
-            data.includes("success") ||
-            data.includes("submitted") ||
-            data.includes("form_sent") ||
-            data.includes("thank") ||
-            event.data.type === "form_submit"
-          ) {
-            if (!formSubmitted) {
-              setFormSubmitted(true)
-
-              // Modal yopish va Telegram'ga yo'naltirish
-              setTimeout(() => {
-                setShowCRMForm(false)
-                setFormSubmitted(false)
-
-                // Telegram kanaliga yo'naltirish
-                window.open("https://t.me/khanov_business", "_blank")
-
-                // Tasdiq xabari
-                setTimeout(() => {
-                  alert("✅ Arizangiz qabul qilindi! Telegram kanalimizga yo'naltirilmoqdasiz...")
-                }, 300)
-              }, 800)
-            }
-          }
-        }
-      }
-
-      window.addEventListener("message", handleMessage)
-
-      return () => {
-        window.removeEventListener("message", handleMessage)
-      }
-    }
-  }, [showCRMForm, formSubmitted])
+  const [formData, setFormData] = useState({
+    full_name: "",
+    phone_number: "",
+    type: "",
+    address: "",
+  })
 
   const rotationVariants = {
     rotate: {
@@ -195,7 +177,6 @@ export default function Home() {
     return rows
   }
 
-
   const logoRows = generateLogoRows()
 
   const scrollVariants = {
@@ -208,6 +189,80 @@ export default function Home() {
       },
     }),
   }
+
+ const handleSubmitForm = async (e: React.FormEvent) => {
+  e.preventDefault();
+
+  if (!formData.full_name || !formData.phone_number || !formData.type || !formData.address) {
+    alert("Barcha maydonlarni to'ldiring!");
+    return;
+  }
+
+  setLoading(true);
+
+  // Telefon raqamni faqat raqam holatiga aylantiramiz
+  const cleanedPhone = formData.phone_number.replace(/\D/g, ""); 
+  // Masalan: "+998 90 123-45-67" → "998901234567"
+
+  try {
+    const response = await fetch("https://backend.khanovbekzod.uz/userss", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        full_name: formData.full_name,
+        phone_number: cleanedPhone, // backendga oddiy string ketdi
+        type: formData.type,
+        address: formData.address,
+      }),
+    });
+
+    if (response.ok) {
+      setSuccessMessage("Tez orada siz bilan bog‘lanamiz!");
+      setShowCRMForm(false);
+      setFormData({ full_name: "", phone_number: "", type: "", address: "" });
+
+      // Telegram kanalga yo'naltirish
+      setTimeout(() => {
+    setShowCRMForm(false);
+    window.location.href = "https://t.me/khanov_business";
+  }, 2000);
+    } else {
+      alert("Xatolik yuz berdi. Qayta urinib ko'ring.");
+    }
+  } catch (error) {
+    console.error("Error:", error);
+    alert("Bog'lanishda xatolik!");
+  } finally {
+    setLoading(false);
+  }
+};
+
+const handlePhoneChange = (e) => {
+  let value = e.target.value.replace(/\D/g, ""); // faqat raqamlarni saqlaymiz
+
+  // Har doim "998" bilan boshlansin
+  if (!value.startsWith("998")) {
+    value = "998" + value.replace(/^998/, ""); // foydalanuvchi o‘chirgan bo‘lsa ham qayta qo‘shamiz
+  }
+
+  // Maksimal uzunlik — 12 raqam (998 + 9 raqam)
+  value = value.slice(0, 12);
+
+  // Formatlash
+  let formatted = "+998";
+
+  if (value.length > 3) formatted += " " + value.slice(3, 5);
+  if (value.length > 5) formatted += " " + value.slice(5, 8);
+  if (value.length > 8) formatted += "-" + value.slice(8, 10);
+  if (value.length > 10) formatted += "-" + value.slice(10, 12);
+
+  setFormData((prev) => ({ ...prev, phone_number: formatted }));
+};
+
+
+
 
   return (
     <main className="w-full">
@@ -244,7 +299,7 @@ export default function Home() {
         ))}
 
         {/* 🔹 MAIN CONTENT */}
-        <div className="flex flex-col items-center justify-center w-full gap-6 md:gap-8 max-w-4xl relative z-10">
+        <div className="flex flex-col -mt-10 items-center justify-center w-full gap-6 md:gap-8 max-w-4xl relative z-10">
           <div className="text-center space-y-3 md:space-y-4 w-full">
             <h1
               className="text-3xl sm:text-5xl md:text-6xl lg:text-7xl 
@@ -295,25 +350,43 @@ export default function Home() {
           {/* CRM photo & button */}
           <div className="flex flex-col -mt-5 md:flex-row items-center justify-center gap-8 md:gap-12 w-full max-w-5xl">
             <div className="flex flex-col items-center gap-4 flex-shrink-0 w-full md:w-auto">
-              <img
-                src="/khanov.png"
-                alt="CRM Dashboard"
-                className="w-full max-w-xs sm:max-w-sm md:max-w-md -mb-12 rounded-2xl transform -skew-y-3 hover:skew-y-0 transition-transform duration-300 "
-              />
+              <div className="relative w-full max-w-xs sm:max-w-sm md:max-w-md -mb-12 transform -skew-y-3 hover:skew-y-0 transition-transform duration-300 rounded-2xl overflow-hidden">
+                <Image
+                  src="/khanov.png"
+                  alt="CRM Dashboard"
+                  width={384}
+                  height={512}
+                  className="object-cover w-full h-full rounded-2xl"
+                  priority={true}
+                  placeholder="blur"
+                  blurDataURL="/khanov.png"
+                />
+              </div>
+
               <button
                 onClick={() => setShowCRMForm(true)}
-                className="bg-gradient-to-br from-blue-600 to-blue-500 hover:from-blue-700 hover:to-blue-600 
-                  text-white font-bold py-4 px-18 rounded-xl transition-all duration-300 transform hover:-translate-y-2 
-                  hover:shadow-2xl active:translate-y-0 text-lg uppercase shadow-xl relative"
+                className="relative bg-gradient-to-b from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700
+                  text-white font-bold py-4 px-8 rounded-xl transition-all duration-200 transform 
+                  active:translate-y-1 text-lg uppercase shadow-lg"
                 style={{
-                  boxShadow: "0 10px 30px rgba(37, 99, 235, 0.4), 0 4px 12px rgba(37, 99, 235, 0.3)",
+                  boxShadow:
+                    "0 8px 16px rgba(59, 130, 246, 0.5), 0 4px 8px rgba(59, 130, 246, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.2)",
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.boxShadow =
+                    "0 12px 24px rgba(59, 130, 246, 0.6), 0 6px 12px rgba(59, 130, 246, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.2)"
+                  e.currentTarget.style.transform = "translateY(-4px)"
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.boxShadow =
+                    "0 8px 16px rgba(59, 130, 246, 0.5), 0 4px 8px rgba(59, 130, 246, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.2)"
+                  e.currentTarget.style.transform = "translateY(0)"
                 }}
               >
-                <span className="relative z-10">
+                <span className="flex items-center gap-2">
                   Ariza qoldiring
-                  <ArrowLeft className="inline-block ml-2 mb-1" size={20} />
+                  <ArrowLeft size={20} />
                 </span>
-                <div className="absolute inset-0 rounded-xl bg-gradient-to-br from-blue-700 to-blue-600 -z-10 translate-y-2 blur-sm opacity-75"></div>
               </button>
             </div>
           </div>
@@ -332,7 +405,6 @@ export default function Home() {
               <CountdownTimer targetDate="2025-11-25T00:00:00" />
             </div>
           </div>
-
         </div>
       </section>
 
@@ -439,94 +511,130 @@ export default function Home() {
       </section>
 
       {/* Cases Section - Logo Carousel */}
-   <section className="bg-gradient-to-b from-gray-800 to-gray-700 py-12 md:py-20 px-4 md:px-6 lg:px-8 overflow-hidden">
-  <div className="max-w-7xl mx-auto">
-    <h2 className="text-3xl sm:text-4xl md:text-5xl font-black text-white mb-8 md:mb-12 text-center">
-      🎯 Case va mijoz fikrlari
-    </h2>
+      <section className="bg-gradient-to-b from-gray-800 to-gray-700 py-12 md:py-20 px-4 md:px-6 lg:px-8 overflow-hidden">
+        <div className="max-w-7xl mx-auto">
+          <h2 className="text-3xl sm:text-4xl md:text-5xl font-black text-white mb-8 md:mb-12 text-center">
+            🎯 Case va mijoz fikrlari
+          </h2>
 
-    {/* 🔹 Logolar harakatlanadigan qism */}
-    <div className="space-y-4 md:space-y-6 mb-12">
-      {logoRows.map((row, rowIdx) => (
-        <div key={rowIdx} className="overflow-hidden">
-          <motion.div
-            className="flex gap-4 md:gap-6"
-            animate="animate"
-            custom={row.direction}
-            variants={scrollVariants}
-          >
-            {row.logos.map((item, idx) => (
-              <div
-                key={idx}
-                className="flex items-center justify-center p-4 md:p-6 rounded-xl h-20 md:h-28 w-20 md:w-28 flex-shrink-0"
-                style={{
-                  background:
-                    "linear-gradient(135deg, rgba(59,130,246,0.2) 0%, rgba(99,102,241,0.2) 100%)",
-                }}
-              >
-                <img
-                  src={item.icon || "/placeholder.svg"}
-                  alt={item.label}
-                  className="h-16 md:h-24 w-16 md:w-24 object-contain"
-                />
+          {/* 🔹 Logolar harakatlanadigan qism */}
+          <div className="space-y-4 md:space-y-6 mb-12">
+            {logoRows.map((row, rowIdx) => (
+              <div key={rowIdx} className="overflow-hidden">
+                <motion.div
+                  className="flex gap-4 md:gap-6"
+                  animate="animate"
+                  custom={row.direction}
+                  variants={scrollVariants}
+                >
+                  {row.logos.map((item, idx) => (
+                    <div
+                      key={idx}
+                      className="flex items-center justify-center p-4 md:p-6 rounded-xl h-20 md:h-28 w-20 md:w-28 flex-shrink-0"
+                      style={{
+                        background: "linear-gradient(135deg, rgba(59,130,246,0.2) 0%, rgba(99,102,241,0.2) 100%)",
+                      }}
+                    >
+                      <img
+                        src={item.icon || "/placeholder.svg"}
+                        alt={item.label}
+                        className="h-16 md:h-24 w-16 md:w-24 object-contain"
+                      />
+                    </div>
+                  ))}
+                </motion.div>
               </div>
             ))}
-          </motion.div>
+          </div>
+
+          <VideoCarousel videos={["/video1.MP4", "/video2.MP4", "/video3.MP4", "/video5.MP4", "/video4.MP4"]} />
         </div>
-      ))}
-    </div>
+      </section>
 
-  
-
-    <VideoCarousel
-      videos={[
-        "/video1.MP4",
-        "/video2.MP4",
-        "/video3.MP4",
-        "/video5.MP4",
-        "/video4.MP4",
-      ]}
-    />
-  </div>
-</section>
-
-
-
-
-
-      {/* CRM Form Modal */}
+      {/* Custom CRM Form Modal */}
       {showCRMForm && (
         <div className="fixed inset-0 bg-black/80 z-[100] flex items-center justify-center p-4 overflow-y-auto">
-          <div className="bg-gradient-to-br from-gray-900 to-gray-800 rounded-2xl p-6 md:p-8 max-w-3xl w-full my-8 border border-gray-700 shadow-2xl">
+          <div className="bg-gradient-to-br from-gray-900 to-gray-800 rounded-2xl p-6 md:p-8 max-w-md w-full my-8 border border-gray-700 shadow-2xl">
             <div className="flex justify-between items-center mb-6">
               <h2 className="text-2xl md:text-3xl font-bold text-white">Ariza qoldiring</h2>
               <button
                 onClick={() => setShowCRMForm(false)}
                 className="text-gray-400 hover:text-white text-3xl font-bold"
               >
-                ✕
+              
               </button>
             </div>
 
-            {/* amoCRM iframe forma */}
-            <div className="w-full bg-white rounded-lg overflow-hidden" style={{ minHeight: "650px" }}>
-              <iframe
-                src="https://forms.amocrm.ru/rcvdlmc"
-                width="100%"
-                height="650"
-                style={{ border: "none", display: "block" }}
-                title="amoCRM Form"
-                allow="payment"
-                sandbox="allow-same-origin allow-scripts allow-forms allow-popups allow-top-navigation"
-              ></iframe>
-            </div>
+            <form onSubmit={handleSubmitForm} className="space-y-4">
+              {successMessage && (
+  <div className="bg-green-500 text-white p-3 rounded-lg text-center mb-4">
+    {successMessage}
+  </div>
+)}
+              {/* Ism input */}
+              <div>
+                <label className="block text-white text-sm font-semibold mb-2">Ism</label>
+                <input
+                  type="text"
+                  placeholder="Ismingizni kiriting"
+                  value={formData.full_name}
+                  onChange={(e) => setFormData({ ...formData, full_name: e.target.value })}
+                  className="w-full px-4 py-2 rounded-lg bg-gray-700 text-white placeholder-gray-400 border border-gray-600 focus:border-blue-500 focus:outline-none transition"
+                />
+              </div>
 
-            <div className="mt-4 space-y-2">
-              <p className="text-gray-400 text-sm text-center">📋 Ma'lumotlar to'g'ridan CRM tizimimizga yuboriladi</p>
-              <p className="text-gray-500 text-xs text-center">
-                Forma yuborilgandan keyin avtomatik Telegram kanalimizga yo'naltirilasiz
-              </p>
-            </div>
+              {/* Telefon raqami */}
+              <div>
+                <label className="block text-white text-sm font-semibold mb-2">Telefon raqami</label>
+                <input
+                  type="tel"
+                  placeholder="+998 90 123-45-67"
+                  value={formData.phone_number}
+                  onChange={handlePhoneChange}
+                  className="w-full px-4 py-2 rounded-lg bg-gray-700 text-white placeholder-gray-400 border border-gray-600 focus:border-blue-500 focus:outline-none transition"
+                />
+              </div>
+
+              {/* Faoliyat turi */}
+              <div>
+                <label className="block text-white text-sm font-semibold mb-2">Faoliyat turi</label>
+                <input
+                  type="text"
+                  placeholder="Misol: Sotuvchi, Manager, ..."
+                  value={formData.type}
+                  onChange={(e) => setFormData({ ...formData, type: e.target.value })}
+                  className="w-full px-4 py-2 rounded-lg bg-gray-700 text-white placeholder-gray-400 border border-gray-600 focus:border-blue-500 focus:outline-none transition"
+                />
+              </div>
+
+              {/* Viloyat tanlash */}
+              <div>
+                <label className="block text-white text-sm font-semibold mb-2">Qayerdan</label>
+                <select
+                  value={formData.address}
+                  onChange={(e) => setFormData({ ...formData, address: e.target.value })}
+                  className="w-full px-4 py-2 rounded-lg bg-gray-700 text-white border border-gray-600 focus:border-blue-500 focus:outline-none transition"
+                >
+                  <option value="">Viloyatni tanlang</option>
+                  {uzbekistanRegions.map((region) => (
+                    <option key={region} value={region}>
+                      {region}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Submit button */}
+              <button
+                type="submit"
+                disabled={loading}
+                className="w-full bg-gradient-to-b from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 disabled:from-gray-500 disabled:to-gray-600 text-white font-bold py-3 px-4 rounded-lg transition-all duration-200 transform active:translate-y-1 mt-6"
+              >
+                {loading ? "Jo'natilmoqda..." : "Jo'natish"}
+              </button>
+            </form>
+
+         
           </div>
         </div>
       )}
@@ -544,16 +652,28 @@ export default function Home() {
 
           <button
             onClick={() => setShowCRMForm(true)}
-            className="bg-gradient-to-br from-blue-600 to-blue-500 hover:from-blue-700 hover:to-blue-600 text-white font-bold py-4 px-18 rounded-xl transition-all duration-300 transform hover:-translate-y-2 hover:shadow-2xl active:translate-y-0 text-lg uppercase shadow-xl relative"
+            className="relative bg-gradient-to-b from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700
+              text-white font-bold py-4 px-8 rounded-xl transition-all duration-200 transform 
+              active:translate-y-1 text-lg uppercase shadow-lg"
             style={{
-              boxShadow: "0 10px 30px rgba(37, 99, 235, 0.4), 0 4px 12px rgba(37, 99, 235, 0.3)",
+              boxShadow:
+                "0 8px 16px rgba(59, 130, 246, 0.5), 0 4px 8px rgba(59, 130, 246, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.2)",
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.boxShadow =
+                "0 12px 24px rgba(59, 130, 246, 0.6), 0 6px 12px rgba(59, 130, 246, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.2)"
+              e.currentTarget.style.transform = "translateY(-4px)"
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.boxShadow =
+                "0 8px 16px rgba(59, 130, 246, 0.5), 0 4px 8px rgba(59, 130, 246, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.2)"
+              e.currentTarget.style.transform = "translateY(0)"
             }}
           >
-            <span className="relative z-10">
+            <span className="flex items-center gap-2 justify-center">
               Ariza qoldiring
-              <ArrowLeft className="inline-block ml-2 mb-1" size={20} />
+              <ArrowLeft size={20} />
             </span>
-            <div className="absolute inset-0 rounded-xl bg-gradient-to-br from-blue-700 to-blue-600 -z-10 translate-y-2 blur-sm opacity-75"></div>
           </button>
         </div>
 
@@ -564,10 +684,15 @@ export default function Home() {
               <div className="flex-shrink-0 relative group">
                 <div className="absolute -inset-1 bg-gradient-to-r  rounded-3xl blur opacity-75 group-hover:opacity-100 transition duration-500 animate-pulse"></div>
                 <div className="relative">
-                  <img
+                  <Image
                     src="/khanov.png"
                     alt="Bekzod Khanov"
-                    className="w-36 h-56 sm:w-64 sm:h-64 md:w-72 md:h-72  object-cover transform group-hover:scale-105 transition-all duration-500  "
+                    width={288}
+                    height={448}
+                    className="object-cover transform group-hover:scale-105 transition-all duration-500 rounded-3xl"
+                    priority={true}
+                    placeholder="blur"
+                    blurDataURL="/khanov.png"
                   />
                 </div>
               </div>
@@ -620,7 +745,12 @@ export default function Home() {
 
                 {/* Expertise Tags */}
                 <div className="flex flex-wrap gap-2 justify-center md:justify-start pt-4">
-                  {["CRM + IP Telefoniya", "MoySklad + CRM", "CRM + Proffesional Target xizmati", "Sotuv Avtomatizatsiya"].map((tag, i) => (
+                  {[
+                    "CRM + IP Telefoniya",
+                    "MoySklad + CRM",
+                    "CRM + Proffesional Target xizmati",
+                    "Sotuv Avtomatizatsiya",
+                  ].map((tag, i) => (
                     <span
                       key={i}
                       className="px-4 py-2 bg-gray-700/50 border border-blue-500/30 rounded-full text-sm font-medium text-blue-300 hover:bg-gray-700 hover:border-blue-500/60 transition-all duration-300"
@@ -631,34 +761,43 @@ export default function Home() {
                 </div>
               </div>
               <div className="flex flex-col gap-3 md:gap-4 text-center w-full max-w-lg px-4 md:px-0">
-            <div className="bg-gradient-to-r from-gray-900 to-gray-700 rounded-2xl p-4 md:p-6 lg:p-8 text-white shadow-lg relative overflow-hidden">
-              <p className="text-base text-center uppercase text-white sm:text-lg md:text-xl font-bold">
-                🎁 25-noyabrgacha 1+1 imkoniyati davom etadi.
-              </p>
-              <p className="text-xs sm:text-sm text-blue-100 mt-3 md:mt-4">
-                Ariza qoldiring — bepul konsultatsiya qilamiz va eng mos yechimni tanlab beramiz.
-              </p>
+                <div className="bg-gradient-to-r from-gray-900 to-gray-700 rounded-2xl p-4 md:p-6 lg:p-8 text-white shadow-lg relative overflow-hidden">
+                  <p className="text-base text-center uppercase text-white sm:text-lg md:text-xl font-bold">
+                    🎁 25-noyabrgacha 1+1 imkoniyati davom etadi.
+                  </p>
+                  <p className="text-xs sm:text-sm text-blue-100 mt-3 md:mt-4">
+                    Ariza qoldiring — bepul konsultatsiya qilamiz va eng mos yechimni tanlab beramiz.
+                  </p>
 
-              {/* 🔹 COUNTDOWN TIMER */}
-              <CountdownTimer targetDate="2025-11-25T00:00:00" />
-            </div>
-          </div>
-          <button
+                  {/* 🔹 COUNTDOWN TIMER */}
+                  <CountdownTimer targetDate="2025-11-25T00:00:00" />
+                </div>
+              </div>
+              <button
                 onClick={() => setShowCRMForm(true)}
-                className="bg-gradient-to-br from-blue-600 to-blue-500 hover:from-blue-700 hover:to-blue-600 
-                  text-white font-bold py-4 px-18 rounded-xl transition-all duration-300 transform hover:-translate-y-2 
-                  hover:shadow-2xl active:translate-y-0 text-lg uppercase shadow-xl relative"
+                className="relative bg-gradient-to-b from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700
+                  text-white font-bold py-4 px-8 rounded-xl transition-all duration-200 transform 
+                  active:translate-y-1 text-lg uppercase shadow-lg"
                 style={{
-                  boxShadow: "0 10px 30px rgba(37, 99, 235, 0.4), 0 4px 12px rgba(37, 99, 235, 0.3)",
+                  boxShadow:
+                    "0 8px 16px rgba(59, 130, 246, 0.5), 0 4px 8px rgba(59, 130, 246, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.2)",
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.boxShadow =
+                    "0 12px 24px rgba(59, 130, 246, 0.6), 0 6px 12px rgba(59, 130, 246, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.2)"
+                  e.currentTarget.style.transform = "translateY(-4px)"
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.boxShadow =
+                    "0 8px 16px rgba(59, 130, 246, 0.5), 0 4px 8px rgba(59, 130, 246, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.2)"
+                  e.currentTarget.style.transform = "translateY(0)"
                 }}
               >
-                <span className="relative z-10">
+                <span className="flex items-center gap-2 justify-center">
                   Ariza qoldiring
-                  <ArrowLeft className="inline-block ml-2 mb-1" size={20} />
+                  <ArrowLeft size={20} />
                 </span>
-                <div className="absolute inset-0 rounded-xl bg-gradient-to-br from-blue-700 to-blue-600 -z-10 translate-y-2 blur-sm opacity-75"></div>
               </button>
-
             </div>
           </div>
         </div>
@@ -668,7 +807,6 @@ export default function Home() {
       <footer className="bg-gradient-to-b from-gray-900 to-black text-white py-8 md:py-12 px-4 md:px-6 lg:px-8">
         <div className="max-w-7xl mx-auto">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8 mb-6 md:mb-8">
-
             <div className="flex justify-center gap-6 md:gap-8">
               <a
                 href="https://t.me/khanov_business"
