@@ -36,8 +36,7 @@ t.src=v;s=b.getElementsByTagName(e)[0];
 s.parentNode.insertBefore(t,s)}(window, document,'script',
 'https://connect.facebook.net/en_US/fbevents.js');
 fbq('init', '1916942475831227');
-fbq('track', 'PageView');
-fbq('track', 'Lead');`
+fbq('track', 'PageView');`
           }}
         />
         <noscript>

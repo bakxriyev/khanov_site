@@ -192,6 +192,10 @@ export default function Home() {
 
  const handleSubmitForm = async (e: React.FormEvent) => {
   e.preventDefault();
+  // Facebook Pixel Lead event
+    if (typeof window !== "undefined" && (window as any).fbq) {
+      (window as any).fbq("track", "Lead")
+    }
 
   if (!formData.full_name || !formData.phone_number || !formData.type || !formData.address) {
     alert("Barcha maydonlarni to'ldiring!");
