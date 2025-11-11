@@ -111,8 +111,8 @@ const clientLogos = [
 ]
 
 const uzbekistanRegions = [
-  "Tashkent",
-  "Tashkent shahar",
+  "Toshkent",
+  "Toshkent shahar",
   "Andijon",
   "Buxoro",
   "Farg'ona",
@@ -122,7 +122,7 @@ const uzbekistanRegions = [
   "Navoi",
   "Samarqand",
   "Sirdaryo",
-  "Surkhandaryo",
+  "Surhandaryo",
 ]
 
 const bgImages = [
@@ -600,7 +600,7 @@ const handlePhoneChange = (e) => {
                 <label className="block text-white text-sm font-semibold mb-2">Faoliyat turi</label>
                 <input
                   type="text"
-                  placeholder="Misol: Sotuvchi, Manager, ..."
+                  placeholder="Faoliyat turi (misol consulting, ishlab chiqarish ...)  "
                   value={formData.type}
                   onChange={(e) => setFormData({ ...formData, type: e.target.value })}
                   className="w-full px-4 py-2 rounded-lg bg-gray-700 text-white placeholder-gray-400 border border-gray-600 focus:border-blue-500 focus:outline-none transition"
