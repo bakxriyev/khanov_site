@@ -226,7 +226,7 @@ export default function Home() {
       // Telegram kanalga yo'naltirish
       setTimeout(() => {
     setShowCRMForm(false);
-    window.location.href = "https://t.me/khanov_business";
+    window.location.href = "https://instagram.com/khanov.bekzod";
   }, 2000);
     } else {
       alert("Xatolik yuz berdi. Qayta urinib ko'ring.");
