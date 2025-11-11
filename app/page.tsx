@@ -111,7 +111,7 @@ const clientLogos = [
 ]
 
 const uzbekistanRegions = [
-  "Toshkent",
+  "Toshkent viloyati",
   "Toshkent shahar",
   "Andijon",
   "Buxoro",
